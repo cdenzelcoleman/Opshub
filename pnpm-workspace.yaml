@@ -1,5 +1,3 @@
-q
-cat > pnpm-workspace.yaml << 'EOF'
 packages:
   - "apps/*"
   - "packages/*"
