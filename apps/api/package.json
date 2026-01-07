@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development node --watch src/index.js",
     "start": "NODE_ENV=production node src/index.js",
+    "build": "echo 'No build step required for Node.js'",
     "test": "NODE_ENV=test vitest",
     "test:run": "NODE_ENV=test vitest run",
     "prisma:generate": "prisma generate",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "vitest": "^1.2.0",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "pino-pretty": "^10.3.0"
   }
 }
