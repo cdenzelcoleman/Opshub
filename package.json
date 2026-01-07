@@ -1,10 +1,13 @@
 {
   "name": "Opshub",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Multi-tenant internal admin console",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "pnpm --filter @opshub/api dev & pnpm --filter @opshub/web dev",
+    "build": "pnpm --filter @opshub/api build && pnpm --filter @opshub/web build",
+    "test": "pnpm --recursive test:run",
+    "install:all": "pnpm install"
   },
   "keywords": [],
   "author": "",

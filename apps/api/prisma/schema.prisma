@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum AuditAction {
+  USER_LOGIN
+  USER_SIGNUP
+  USER_JOINED_ORG
+  ORG_CREATED
+  MEMBER_ADDED
+  MEMBER_REMOVED
+  ROLE_CHANGED
+  TICKET_CREATED
+  TICKET_UPDATED
+  STATUS_CHANGED
+  TICKET_ASSIGNED
+  TICKET_APPROVED
+  TICKET_DENIED
+  ATTACHMENT_UPLOADED
+  ATTACHMENT_DELETED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships         OrgMembership[]
+  createdTickets      Ticket[]        @relation("TicketCreator")
+  assignedTickets     Ticket[]        @relation("TicketAssignee")
+  approvedTickets     Ticket[]        @relation("TicketApprover")
+  uploadedAttachments Attachment[]
+  refreshTokens       RefreshToken[]
+  auditLogs           AuditLog[]
+
+  @@index([email])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships OrgMembership[]
+  tickets     Ticket[]
+  auditLogs   AuditLog[]
+
+  @@index([slug])
+}
+
+model OrgMembership {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role
+  joinedAt       DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Ticket {
+  id               String       @id @default(cuid())
+  title            String
+  description      String       @db.Text
+  organizationId   String
+  status           TicketStatus @default(OPEN)
+  requiresApproval Boolean      @default(false)
+
+  creatorId    String
+  assigneeId   String?
+  approvedById String?
+  approvedAt   DateTime?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation("TicketCreator", fields: [creatorId], references: [id])
+  assignee     User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  approver     User?        @relation("TicketApprover", fields: [approvedById], references: [id])
+
+  attachments Attachment[]
+  auditLogs   AuditLog[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([assigneeId])
+  @@index([creatorId])
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  ticketId     String
+  filename     String
+  mimeType     String
+  size         Int
+  fileData     Bytes
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedBy User   @relation(fields: [uploadedById], references: [id])
+
+  @@index([ticketId])
+}
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String
+  ticketId       String?
+  userId         String
+  action         AuditAction
+  metadata       Json
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ticket       Ticket?      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, createdAt])
+  @@index([ticketId, createdAt])
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
