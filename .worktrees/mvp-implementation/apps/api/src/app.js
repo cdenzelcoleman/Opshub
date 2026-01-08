@@ -6,6 +6,7 @@ import pinoHttp from 'pino-http'
 import { logger } from './lib/logger.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import authRoutes from './routes/auth.js'
+import orgRoutes from './routes/orgs.js'
 
 export function createApp() {
   const app = express()
@@ -49,6 +50,9 @@ export function createApp() {
 
   // Auth routes
   app.use('/api/auth', authRoutes)
+
+  // Org routes
+  app.use('/api/orgs', orgRoutes)
 
   // 404 handler
   app.use((req, res) => {
