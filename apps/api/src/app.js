@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit'
 import pinoHttp from 'pino-http'
 import { logger } from './lib/logger.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import orgRoutes from './routes/orgs.js'
 
 export function createApp() {
   const app = express()
@@ -45,6 +46,9 @@ export function createApp() {
   app.get('/api', (req, res) => {
     res.json({ message: 'Ops Hub API' })
   })
+
+  // Org routes
+  app.use('/api/orgs', orgRoutes)
 
   // 404 handler
   app.use((req, res) => {
