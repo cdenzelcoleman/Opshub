@@ -7,6 +7,7 @@ import { logger } from './lib/logger.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import authRoutes from './routes/auth.js'
 import orgRoutes from './routes/orgs.js'
+import ticketRoutes from './routes/tickets.js'
 
 export function createApp() {
   const app = express()
@@ -53,6 +54,9 @@ export function createApp() {
 
   // Org routes
   app.use('/api/orgs', orgRoutes)
+
+  // Ticket routes
+  app.use('/api/orgs', ticketRoutes)
 
   // 404 handler
   app.use((req, res) => {
