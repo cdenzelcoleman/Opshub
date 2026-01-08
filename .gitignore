@@ -1,13 +1,9 @@
 # Worktrees
-.worktrees/
+# .worktrees/
 
 
 
 
-
-# Claude Code
-.claude/
-docs/plans/
 
 # Dependencies
 node_modules/
@@ -44,3 +40,19 @@ coverage/
 
 # Prisma
 prisma/.env
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Claude Code
+.claude/
+docs/plans/
